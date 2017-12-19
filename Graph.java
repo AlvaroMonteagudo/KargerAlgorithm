@@ -5,6 +5,7 @@ public class Graph {
     private static RandomGenerator rnd;
 
     private int PRODUCTS;
+    private boolean DEBUG;
     private boolean buyTogether[][];
     private Map<Integer, Product> products = new HashMap<>();
     private Map<Integer, ArrayList<Product>> graph;
@@ -12,15 +13,20 @@ public class Graph {
 
 
 
-    public Graph(int n, RandomGenerator rnd) {
+    public Graph(int n, RandomGenerator rnd, boolean debug) {
         PRODUCTS = n;
+        DEBUG = debug;
+        if (DEBUG) System.out.print("[DEBUG] Creating instances of needed data structures...");
         buyTogether = new boolean[n][n];
         graph = new HashMap<>();
         Graph.rnd = rnd;
+        if (DEBUG) System.out.println("[OK] DONE.");
     }
 
     public void fill() {
 
+
+        if (DEBUG) System.out.print("[DEBUG] Initializing random products...");
         //Initialize random products
         for (int i = 0; i < PRODUCTS; i++) {
 
@@ -29,7 +35,9 @@ public class Graph {
 
             graph.put(i, new ArrayList<>());
         }
+        if (DEBUG) System.out.println("[OK] DONE.");
 
+        if (DEBUG) System.out.print("[DEBUG] Matching products randomized, generating edges, filling graph...");
         for (int i = 0; i < PRODUCTS; i++) {
             for (int j = i; j < PRODUCTS; j++) {
                 // A product always is bought with itself
@@ -50,29 +58,30 @@ public class Graph {
                 }
             }
         }
+        if (DEBUG) System.out.println("[OK] DONE.");
     }
 
     public void minCutKarger() {
+        if (DEBUG) System.out.println("[DEBUG] Karger's algorithm in progress...");
         while (graph.size() > 2) {
-            int index1 = rnd.getRnd().nextInt(PRODUCTS);
-            Product p1 = products.get(index1);
+            if (DEBUG) System.out.println("[DEBUG] Selecting random edge to be removed");
+            Edge edgeToRemove = getEdge(rnd.getRnd().nextInt(graphEdges.size()));
+            Product p1 = edgeToRemove.getFirst();
+            Product p2 = edgeToRemove.getOppositeEnd(p1);
 
-            if (p1.getEdges().size() != 0) {
-                int index2 = rnd.getRnd().nextInt(PRODUCTS);
-                while (index2 == index1) {
-                    index2 = rnd.getRnd().nextInt(PRODUCTS);
-                }
+            if (DEBUG) System.out.print("[DEBUG] Removing selected edge...");
+            graphEdges.remove(edgeToRemove);
+            p1.getEdges().remove(edgeToRemove);
+            p2.getEdges().remove(edgeToRemove);
+            if (DEBUG) System.out.println("[OK] DONE.");
 
-                Product p2 = products.get(index2);
-                
-                merge(p1, p2);
-
-            } else System.err.println("Graph must be fully connected");
+            merge(p1, p2);
         }
+        if (DEBUG) System.out.println("[OK] DONE.");
     }
 
     private void merge(Product p1, Product p2) {
-
+        if (DEBUG) System.out.print("[DEBUG] Merging vertices...");
     }
 
     public void addProduct(Product p) {
@@ -82,10 +91,12 @@ public class Graph {
     }
 
     public void reset() {
+        if (DEBUG) System.out.print("Clearing up graph...");
         graph.clear();
         for (int i = 0; i < PRODUCTS ; i++) {
             graph.put(i, new ArrayList<>());
         }
+        if (DEBUG) System.out.println("DONE.");
     }
 
     private boolean wereBoughtTogether(int i, int j) {
@@ -103,6 +114,10 @@ public class Graph {
             }
         }
         return 0;
+    }
+
+    private Edge getEdge(int i) {
+        return ((Edge) graphEdges.toArray()[i]);
     }
 
     public void printGraph(){
