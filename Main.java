@@ -7,9 +7,10 @@ public class Main{
 
 	    RandomGenerator rnd = new RandomGenerator();
 
-	    Graph graph = new Graph(5);
-	    graph.fill(rnd);
+	    Graph graph = new Graph(5, rnd);
+	    graph.fill();
 	    graph.printBoughtTogether();
+	    graph.printGraph();
 	    graph.printProducts();
 	}
 }

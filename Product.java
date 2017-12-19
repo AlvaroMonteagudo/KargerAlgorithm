@@ -68,6 +68,10 @@ public class Product {
 	 * Return edges that connects this product to others
 	 */
     public Set<Edge> getEdges() { return edges; }
+
+    public Edge getEdge(int i) {
+        return (Edge) edges.toArray()[i];
+    }
 	
 	public String toString(){
 

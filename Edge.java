@@ -33,6 +33,11 @@ public class Edge {
 		second.addEdge(this);
 	}
 
+	public Product getOppositeEnd(Product p) {
+	    if (vertices.contains(p)) return vertices.get(1 - vertices.indexOf(p));
+	    else throw new IllegalArgumentException("Edge does not contain specified product");
+    }
+
 	public Product getFirst() {
 		return first;
 	}

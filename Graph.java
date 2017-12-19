@@ -40,8 +40,13 @@ public class Graph {
                     buyTogether[i][j] = rnd.getRnd().nextBoolean();
                     buyTogether[j][i] = buyTogether[i][j];
 
-                    Edge edge = new Edge(products.get(i), products.get(j));
-                    graphEdges.add(edge);
+                    if (buyTogether[i][j]) {
+                        // Generate edge of the graph and save in the corresponding structures
+                        Edge edge = new Edge(products.get(i), products.get(j));
+                        graphEdges.add(edge);
+                        products.get(i).addEdge(edge);
+                        products.get(j).addEdge(edge);
+                    }
                 }
             }
         }
@@ -100,26 +105,46 @@ public class Graph {
         return 0;
     }
 
+    public void printGraph(){
+        System.out.println("GRAPH");
+        System.out.println("=====\n");
+        StringBuilder stringToPrint = new StringBuilder();
+        for (int i = 0; i < products.size(); i++) {
+            stringToPrint.append(i).append(": [");
+            for (int j = 0; j < products.get(i).getEdges().size(); j++) {
+                stringToPrint.append(getId(products.get(i).getEdge(j).getOppositeEnd(products.get(i)))).append(",");
+            }
+
+            if (stringToPrint.toString().lastIndexOf(',') != -1) {
+                System.out.println(stringToPrint.toString().substring(0, stringToPrint.toString().length() - 1) + "]");
+            } else {
+                System.out.println(stringToPrint.toString() + "]");
+            }
+
+            stringToPrint.setLength(0);
+        }
+    }
+
     public void printBoughtTogether(){
         System.out.println("PRODUCTS BOUGHT TOGETHER TABLE");
-        System.out.println("==============================");
-        System.out.println();
-        for (int i = 0; i < buyTogether.length; i++) {
+        System.out.println("==============================\n");
+        for (boolean[] aBuyTogether : buyTogether) {
             for (int j = 0; j < buyTogether[0].length; j++) {
-                int aux = buyTogether[i][j] ? 1 : 0;
-                System.out.print( aux + "  ");
+                int aux = aBuyTogether[j] ? 1 : 0;
+                System.out.print(aux + "  ");
             }
             System.out.print("\n");
         }
+        System.out.println();
     }
 
     public void printProducts(){
         System.out.println();
         System.out.println("PRODUCT LIST");
-        System.out.println("============");
-        System.out.println();
+        System.out.println("============\n");
         for (int i = 0; i < products.size(); i++) {
             System.out.println("Product_" + i + ": " + products.get(i).toString());
         }
+        System.out.println();
     }
 }
