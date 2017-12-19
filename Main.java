@@ -4,10 +4,10 @@ public class Main{
 
 	    RandomGenerator rnd = new RandomGenerator();
 
-	    Graph graph = new Graph(15, rnd, false);
+	    Graph graph = new Graph(5, rnd, false);
 	    graph.fill();
-	    graph.printBoughtTogether();
-	    graph.printGraph();
-	    graph.printProducts();
+        graph.printGraph();
+	    //graph.minCutKarger();
+	    //graph.printGraph();
 	}
 }

@@ -82,6 +82,9 @@ public class Graph {
 
     private void merge(Product p1, Product p2) {
         if (DEBUG) System.out.print("[DEBUG] Merging vertices...");
+        graph.remove(getKeyProduct(p2));
+        p1.getEdges().addAll(p2.getEdges());
+        graph.get(getKeyProduct(p1)).add(p2);
     }
 
     public void addProduct(Product p) {
@@ -107,8 +110,17 @@ public class Graph {
         return products.get(id);
     }
 
-    private int getId(Product p) {
+    private int getKeyProduct(Product p) {
         for (Map.Entry<Integer, Product> e : products.entrySet()) {
+            if (e.getValue().equals(p)) {
+                return e.getKey();
+            }
+        }
+        return 0;
+    }
+
+    private int getKeyGraph(ArrayList<Product> p) {
+        for (Map.Entry<Integer, ArrayList<Product>> e : graph.entrySet()) {
             if (e.getValue().equals(p)) {
                 return e.getKey();
             }
@@ -124,10 +136,51 @@ public class Graph {
         System.out.println("GRAPH");
         System.out.println("=====\n");
         StringBuilder stringToPrint = new StringBuilder();
+
+        for (int i = 0; i < graph.size(); i++) {
+            if (graph.get(i).isEmpty()){
+                stringToPrint.append("Not merged yet(").append(i).append(')');
+            } else {
+                stringToPrint.append("Merged(").append(getKeyGraph(graph.get(i))).append(',');
+            }
+
+            for (int j = 0; j < graph.get(i).size(); j++) {
+                stringToPrint.append(getKeyProduct(graph.get(i).get(j))).append(',');
+            }
+            if (stringToPrint.toString().lastIndexOf(',') != -1) {
+                stringToPrint.deleteCharAt(stringToPrint.toString().lastIndexOf(','));
+            }
+
+            if (graph.get(i).isEmpty()){
+                stringToPrint.append(" : [");
+            } else {
+                stringToPrint.append(") : [");
+            }
+
+            for (int j = 0; j < products.get(i).getEdges().size(); j++) {
+                stringToPrint.append(getKeyProduct(products.get(i).getEdge(j).getOppositeEnd(products.get(i)))).append(",");
+            }
+
+            if (stringToPrint.toString().lastIndexOf(',') != -1) {
+                System.out.println(stringToPrint.toString().substring(0, stringToPrint.toString().length() - 1) + "]");
+            } else {
+                System.out.println(stringToPrint.toString() + "]");
+            }
+
+            stringToPrint.setLength(0);
+        }
+
+    }
+
+
+    public void printInitialGraph(){
+        System.out.println("INITIAL GRAPH");
+        System.out.println("=============\n");
+        StringBuilder stringToPrint = new StringBuilder();
         for (int i = 0; i < products.size(); i++) {
             stringToPrint.append(i).append(": [");
             for (int j = 0; j < products.get(i).getEdges().size(); j++) {
-                stringToPrint.append(getId(products.get(i).getEdge(j).getOppositeEnd(products.get(i)))).append(",");
+                stringToPrint.append(getKeyProduct(products.get(i).getEdge(j).getOppositeEnd(products.get(i)))).append(",");
             }
 
             if (stringToPrint.toString().lastIndexOf(',') != -1) {
