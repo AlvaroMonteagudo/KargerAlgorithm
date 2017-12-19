@@ -28,6 +28,9 @@ public class Edge {
 
 		vertices.add(first);
 		vertices.add(second);
+
+		first.addEdge(this);
+		second.addEdge(this);
 	}
 
 	public Product getFirst() {
@@ -46,4 +49,7 @@ public class Edge {
 		this.second = second;
 	}
 
+    public List<Product> getVertices() {
+        return vertices;
+    }
 }

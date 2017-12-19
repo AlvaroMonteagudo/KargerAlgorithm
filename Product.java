@@ -63,6 +63,11 @@ public class Product {
 	public double getPrice(){
 		return this.price;
 	}
+
+	/*
+	 * Return edges that connects this product to others
+	 */
+    public Set<Edge> getEdges() { return edges; }
 	
 	public String toString(){
 
