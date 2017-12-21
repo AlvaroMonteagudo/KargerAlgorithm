@@ -43,7 +43,7 @@ public class Graph {
                 if (i == j) {
                     buyTogether[i][j] = true;
                 } else {
-                    // If i is bought with j -> j is bought with i
+                    // If i is bought with j then j is bought with i
                     buyTogether[i][j] = rnd.getRnd().nextBoolean();
                     buyTogether[j][i] = buyTogether[i][j];
 
@@ -53,7 +53,6 @@ public class Graph {
                         graphEdges.add(edge);
                         products.get(i).addEdge(edge);
                         products.get(j).addEdge(edge);
-                        System.out.println(getKeyProduct(products.get(i)) + " - " + getKeyProduct(edge.getOppositeEnd(products.get(i))));
                     }
                 }
             }
@@ -67,12 +66,12 @@ public class Graph {
             //printGraph();
             if (DEBUG) System.out.println("[DEBUG] Selecting random edge to be removed");
             Edge edgeToRemove = getEdge(rnd.getRnd().nextInt(graphEdges.size()));
-            System.out.println(edgeToString(edgeToRemove));
             Product p1 = edgeToRemove.getFirst();
             Product p2 = edgeToRemove.getOppositeEnd(p1);
 
-            if (DEBUG) System.out.print("[DEBUG] Updating graph status...");
-            graphEdges.removeAll(Collections.singleton(edgeToRemove));
+            if (DEBUG) System.out.print("[DEBUG] Updating graph status... ");
+            //graphEdges.removeAll(Collections.singleton(edgeToRemove));
+            graphEdges.remove(edgeToRemove);
             p1.getEdges().remove(edgeToRemove);
             p2.getEdges().remove(edgeToRemove);
             if (DEBUG) System.out.println("[OK] DONE.");
@@ -83,24 +82,26 @@ public class Graph {
     }
 
     private void merge(Product p1, Product p2) {
-        if (DEBUG) System.out.print("[DEBUG] Merging vertices " + getKeyProduct(p1) + " and " + getKeyProduct(p2));
+        if (DEBUG) System.out.print("[DEBUG] Merging vertices " + getKeyProduct(p1) + " and " + getKeyProduct(p2) + " ");
         graph.get(getKeyProduct(p1)).add(p2);
         graph.get(getKeyProduct(p1)).addAll(graph.get(getKeyProduct(p2)));
-        graph.remove(getKeyProduct(p2));
         // Migrate all edges to the combined node
         for (Iterator<Edge> it = p2.getEdges().iterator(); it.hasNext(); ) {
             Edge e = it.next();
             it.remove();
-
             // Remove edge from graph and from product
             graphEdges.remove(e);
-            p2.getEdges().remove(e);
+            p2.getEdges().removeAll(Collections.singleton(e));
             // Set new value of edge that no longer exists
             e.replaceEndOfEdge(p2, p1);
             // Add modified edge to graph
             p1.addEdge(e);
             graphEdges.add(e);
+
         }
+        //System.out.println();
+
+        graph.remove(getKeyProduct(p2));
         if (DEBUG) System.out.println("[OK] DONE.");
     }
 
@@ -143,6 +144,7 @@ public class Graph {
         return getKeyProduct(edge.getFirst()) + " - " + getKeyProduct(edge.getSecond());
     }
 
+    /// Todavía no es definitivo pero para aclarar va bien
     public void printGraph(){
         System.out.println("GRAPH");
         System.out.println("=====\n");
