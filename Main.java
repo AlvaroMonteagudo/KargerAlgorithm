@@ -7,7 +7,7 @@ public class Main{
 	    Graph graph = new Graph(5, rnd, false);
 	    graph.fill();
         graph.printGraph();
-	    //graph.minCutKarger();
-	    //graph.printGraph();
+	    graph.minCutKarger();
+	    graph.printGraph();
 	}
 }
