@@ -16,7 +16,7 @@ public class Graph {
     public Graph(int n, RandomGenerator rnd, boolean debug) {
         PRODUCTS = n;
         DEBUG = debug;
-        if (DEBUG) System.out.print("[DEBUG] Creating instances of needed data structures...");
+        if (DEBUG) System.out.print("[DEBUG] Creating instances of needed data structures... ");
         buyTogether = new boolean[n][n];
         graph = new HashMap<>();
         Graph.rnd = rnd;
@@ -25,8 +25,7 @@ public class Graph {
 
     public void fill() {
 
-
-        if (DEBUG) System.out.print("[DEBUG] Initializing random products...");
+        if (DEBUG) System.out.print("[DEBUG] Initializing random products... ");
         //Initialize random products
         for (int i = 0; i < PRODUCTS; i++) {
 
@@ -37,7 +36,7 @@ public class Graph {
         }
         if (DEBUG) System.out.println("[OK] DONE.");
 
-        if (DEBUG) System.out.print("[DEBUG] Matching products randomized, generating edges, filling graph...");
+        if (DEBUG) System.out.print("[DEBUG] Matching products randomized, generating edges, filling graph... ");
         for (int i = 0; i < PRODUCTS; i++) {
             for (int j = i; j < PRODUCTS; j++) {
                 // A product always is bought with itself
@@ -54,6 +53,7 @@ public class Graph {
                         graphEdges.add(edge);
                         products.get(i).addEdge(edge);
                         products.get(j).addEdge(edge);
+                        System.out.println(getKeyProduct(products.get(i)) + " - " + getKeyProduct(edge.getOppositeEnd(products.get(i))));
                     }
                 }
             }
@@ -64,13 +64,15 @@ public class Graph {
     public void minCutKarger() {
         if (DEBUG) System.out.println("[DEBUG] Karger's algorithm in progress...");
         while (graph.size() > 2) {
+            //printGraph();
             if (DEBUG) System.out.println("[DEBUG] Selecting random edge to be removed");
             Edge edgeToRemove = getEdge(rnd.getRnd().nextInt(graphEdges.size()));
+            System.out.println(edgeToString(edgeToRemove));
             Product p1 = edgeToRemove.getFirst();
             Product p2 = edgeToRemove.getOppositeEnd(p1);
 
-            if (DEBUG) System.out.print("[DEBUG] Removing selected edge...");
-            graphEdges.remove(edgeToRemove);
+            if (DEBUG) System.out.print("[DEBUG] Updating graph status...");
+            graphEdges.removeAll(Collections.singleton(edgeToRemove));
             p1.getEdges().remove(edgeToRemove);
             p2.getEdges().remove(edgeToRemove);
             if (DEBUG) System.out.println("[OK] DONE.");
@@ -81,25 +83,30 @@ public class Graph {
     }
 
     private void merge(Product p1, Product p2) {
-        if (DEBUG) System.out.print("[DEBUG] Merging vertices...");
-        graph.remove(getKeyProduct(p2));
-        p1.getEdges().addAll(p2.getEdges());
+        if (DEBUG) System.out.print("[DEBUG] Merging vertices " + getKeyProduct(p1) + " and " + getKeyProduct(p2));
         graph.get(getKeyProduct(p1)).add(p2);
+        graph.get(getKeyProduct(p1)).addAll(graph.get(getKeyProduct(p2)));
+        graph.remove(getKeyProduct(p2));
+        // Migrate all edges to the combined node
+        for (Iterator<Edge> it = p2.getEdges().iterator(); it.hasNext(); ) {
+            Edge e = it.next();
+            it.remove();
+
+            // Remove edge from graph and from product
+            graphEdges.remove(e);
+            p2.getEdges().remove(e);
+            // Set new value of edge that no longer exists
+            e.replaceEndOfEdge(p2, p1);
+            // Add modified edge to graph
+            p1.addEdge(e);
+            graphEdges.add(e);
+        }
+        if (DEBUG) System.out.println("[OK] DONE.");
     }
 
     public void addProduct(Product p) {
         ++PRODUCTS;
         products.put(PRODUCTS, p);
-        reset();
-    }
-
-    public void reset() {
-        if (DEBUG) System.out.print("Clearing up graph...");
-        graph.clear();
-        for (int i = 0; i < PRODUCTS ; i++) {
-            graph.put(i, new ArrayList<>());
-        }
-        if (DEBUG) System.out.println("DONE.");
     }
 
     private boolean wereBoughtTogether(int i, int j) {
@@ -132,12 +139,17 @@ public class Graph {
         return ((Edge) graphEdges.toArray()[i]);
     }
 
+    private String edgeToString(Edge edge) {
+        return getKeyProduct(edge.getFirst()) + " - " + getKeyProduct(edge.getSecond());
+    }
+
     public void printGraph(){
         System.out.println("GRAPH");
         System.out.println("=====\n");
         StringBuilder stringToPrint = new StringBuilder();
 
-        for (int i = 0; i < graph.size(); i++) {
+        for (Map.Entry<Integer, ArrayList<Product>> entry : graph.entrySet()) {
+            int i = entry.getKey();
             if (graph.get(i).isEmpty()){
                 stringToPrint.append("Not merged yet(").append(i).append(')');
             } else {
@@ -147,6 +159,7 @@ public class Graph {
             for (int j = 0; j < graph.get(i).size(); j++) {
                 stringToPrint.append(getKeyProduct(graph.get(i).get(j))).append(',');
             }
+
             if (stringToPrint.toString().lastIndexOf(',') != -1) {
                 stringToPrint.deleteCharAt(stringToPrint.toString().lastIndexOf(','));
             }
@@ -169,9 +182,8 @@ public class Graph {
 
             stringToPrint.setLength(0);
         }
-
+        System.out.println();
     }
-
 
     public void printInitialGraph(){
         System.out.println("INITIAL GRAPH");
@@ -214,5 +226,16 @@ public class Graph {
             System.out.println("Product_" + i + ": " + products.get(i).toString());
         }
         System.out.println();
+    }
+
+    public void printProductsConnection() {
+        for (int i = 0; i < products.size(); i++) {
+            System.out.print(i + ": ");
+            for (int j = 0; j < products.get(i).getEdges().size(); j++) {
+                Edge e = products.get(i).getEdge(j);
+                System.out.print(getKeyProduct(e.getFirst()) + " - " + getKeyProduct(e.getOppositeEnd(e.getFirst())) + " ");
+            }
+            System.out.println();
+        }
     }
 }

@@ -35,7 +35,17 @@ public class Edge {
 
 	public Product getOppositeEnd(Product p) {
 	    if (vertices.contains(p)) return vertices.get(1 - vertices.indexOf(p));
-	    else throw new IllegalArgumentException("Edge does not contain specified product");
+	    else {
+            System.out.println("Edge does not contain specified product: " + this + " " + p);
+            return null;
+        }
+	    //else throw new IllegalArgumentException("Edge does not contain specified product: " + this + " " + p);
+    }
+
+    public void replaceEndOfEdge(Product oldP, Product newP) {
+	    //if (vertices.contains(oldP))
+        vertices.set(vertices.indexOf(oldP), newP);
+	    //else throw new IllegalArgumentException("Edge does not contain specified product: " + this + " " + oldP);
     }
 
 	public Product getFirst() {
