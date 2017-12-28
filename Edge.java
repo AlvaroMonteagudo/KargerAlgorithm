@@ -28,9 +28,6 @@ public class Edge {
 
 		vertices.add(first);
 		vertices.add(second);
-
-		first.addEdge(this);
-		second.addEdge(this);
 	}
 
 	public Product getOppositeEnd(Product p) {
@@ -71,5 +68,24 @@ public class Edge {
 
     public List<Product> getVertices() {
         return vertices;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Edge edge = (Edge) o;
+
+        return (first.equals(edge.first) && second.equals(edge.second)) ||
+               (first.equals(edge.second) && second.equals(edge.first));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = first != null ? first.hashCode() : 0;
+        result = 31 * result + (second != null ? second.hashCode() : 0);
+        return result;
     }
 }
