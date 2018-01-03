@@ -37,22 +37,26 @@ public class Graph {
         if (DEBUG) System.out.println("[OK] DONE.");
 
         if (DEBUG) System.out.print("[DEBUG] Matching products randomized, generating edges, filling graph... ");
-        for (int i = 0; i < PRODUCTS; i++) {
-            for (int j = i; j < PRODUCTS; j++) {
-                // A product always is bought with itself
-                if (i == j) {
-                    buyTogether[i][j] = true;
-                } else {
-                    // If i is bought with j then j is bought with i
-                    buyTogether[i][j] = rnd.getRnd().nextBoolean();
-                    buyTogether[j][i] = buyTogether[i][j];
 
-                    if (buyTogether[i][j]) {
-                        // Generate edge of the graph and save in the corresponding structures
-                        Edge edge = new Edge(products.get(i), products.get(j));
-                        graphEdges.add(edge);
-                        products.get(i).addEdge(edge);
-                        products.get(j).addEdge(edge);
+        // Force graph to be at least a percentage connected
+        while (!sparse()) {
+            for (int i = 0; i < PRODUCTS; i++) {
+                for (int j = i; j < PRODUCTS; j++) {
+                    // A product always is bought with itself
+                    if (i == j) {
+                        buyTogether[i][j] = true;
+                    } else {
+                        // If i is bought with j then j is bought with i
+                        buyTogether[i][j] = rnd.getRnd().nextBoolean();
+                        buyTogether[j][i] = buyTogether[i][j];
+
+                        if (buyTogether[i][j]) {
+                            // Generate edge of the graph and save in the corresponding structures
+                            Edge edge = new Edge(products.get(i), products.get(j));
+                            graphEdges.add(edge);
+                            products.get(i).addEdge(edge);
+                            products.get(j).addEdge(edge);
+                        }
                     }
                 }
             }
@@ -60,11 +64,25 @@ public class Graph {
         if (DEBUG) System.out.println("[OK] DONE.");
     }
 
+    private boolean sparse() {
+        double sparse = ((double) graphEdges.size() * 2.0) / (PRODUCTS * (PRODUCTS - 1));
+        if (Double.compare(sparse, 0.7) >= 0) {
+            return true;
+        } else {
+            graphEdges.clear();
+            for (int i = 0; i < PRODUCTS; i++) {
+                products.get(i).getEdges().clear();
+            }
+            return false;
+        }
+    }
+
     public void minCutKarger() {
         if (DEBUG) System.out.println("[DEBUG] Karger's algorithm in progress...");
         while (graph.size() > 2) {
             //printGraph();
             if (DEBUG) System.out.println("[DEBUG] Selecting random edge to be removed");
+            System.out.println(graphEdges.size());
             Edge edgeToRemove = getEdge(rnd.getRnd().nextInt(graphEdges.size()));
             Product p1 = edgeToRemove.getFirst();
             Product p2 = edgeToRemove.getOppositeEnd(p1);
@@ -72,11 +90,15 @@ public class Graph {
             if (DEBUG) System.out.print("[DEBUG] Updating graph status... ");
             //graphEdges.removeAll(Collections.singleton(edgeToRemove));
             graphEdges.remove(edgeToRemove);
-            p1.getEdges().remove(edgeToRemove);
-            p2.getEdges().remove(edgeToRemove);
+            p1.remove(edgeToRemove);
+            p2.remove(edgeToRemove);
             if (DEBUG) System.out.println("[OK] DONE.");
 
+            //this.printProductsConnection();
+
             merge(p1, p2);
+
+            //this.printProductsConnection();
         }
         if (DEBUG) System.out.println("[OK] DONE.");
     }
@@ -88,16 +110,20 @@ public class Graph {
         // Migrate all edges to the combined node
         for (Iterator<Edge> it = p2.getEdges().iterator(); it.hasNext(); ) {
             Edge e = it.next();
+            //System.out.println(edgeToString(e));
             it.remove();
             // Remove edge from graph and from product
             graphEdges.remove(e);
-            p2.getEdges().removeAll(Collections.singleton(e));
+            p2.getEdges().remove(e);
+            e.getOppositeEnd(p2).getEdges().remove(e);
+            //this.printProductsConnection();
             // Set new value of edge that no longer exists
             e.replaceEndOfEdge(p2, p1);
             // Add modified edge to graph
             p1.addEdge(e);
+            e.getOppositeEnd(p1).addEdge(e);
             graphEdges.add(e);
-
+            //this.printProductsConnection();
         }
         //System.out.println();
 

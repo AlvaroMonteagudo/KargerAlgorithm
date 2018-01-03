@@ -7,7 +7,7 @@ public class Product {
 	private int unit;
 	private double price;
 
-	private final Set<Edge> edges;
+	private Set<Edge> edges;
 
 	/*
 	 * This class represent a vertex of the graph like a product
@@ -20,17 +20,21 @@ public class Product {
 	}
 
 	public void addEdge(Edge edge) {
-	    edges.add(edge);
-    }
-
-    /**public void removeEdge(Edge edge) {
-        for (Edge e: edges) {
-            if ((e.getFirst() == this && e.getSecond() == p) || (e.getFirst() == p && e.getSecond() == this)) {
-                edges.remove(e);
-                break;
+        for (int i = 0; i < edges.size(); i++) {
+            if (getEdge(i).equals(edge)) {
+                return;
             }
         }
-    }*/
+        edges.add(edge);
+    }
+
+    public void remove(Edge edge) {
+        for (int i = 0; i < edges.size(); i++) {
+            if (getEdge(i).equals(edge)) {
+                edges.remove(edge);
+            }
+        }
+    }
 
 	/*
 	 * Assign the name of the product
@@ -95,9 +99,9 @@ public class Product {
 
         Product product = (Product) o;
 
-        if (unit != product.unit) return false;
-        if (Double.compare(product.price, price) != 0) return false;
-        return (name != null ? name.equals(product.name) : product.name == null) && edges.equals(product.edges);
+        return unit == product.unit &&
+               Double.compare(product.price, price) == 0 &&
+               (name != null ? name.equals(product.name) : product.name == null);
     }
 
     @Override
@@ -108,7 +112,6 @@ public class Product {
         result = 31 * result + unit;
         temp = Double.doubleToLongBits(price);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + edges.hashCode();
         return result;
     }
 }

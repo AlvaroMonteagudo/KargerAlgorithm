@@ -6,6 +6,7 @@ public class Main{
 
 	    Graph graph = new Graph(5, rnd, true);
 	    graph.fill();
+	    //graph.printProductsConnection();
 	    //graph.printProducts();
         //graph.printGraph();
 	    graph.minCutKarger();
