@@ -4,9 +4,10 @@ public class Main{
 
 	    RandomGenerator rnd = new RandomGenerator();
 
-	    Graph graph = new Graph(5, rnd, false);
+	    Graph graph = new Graph(5, rnd, true);
 	    graph.fill();
-        graph.printGraph();
+	    //graph.printProducts();
+        //graph.printGraph();
 	    graph.minCutKarger();
 	    graph.printGraph();
 	}

@@ -7,7 +7,7 @@ public class Product {
 	private int unit;
 	private double price;
 
-	private final Set<Edge> edges = new HashSet<>();
+	private final Set<Edge> edges;
 
 	/*
 	 * This class represent a vertex of the graph like a product
@@ -16,11 +16,21 @@ public class Product {
 		this.name = name;
 		this.unit = unit;
 		this.price = price;
+		edges = new HashSet<>();
 	}
 
 	public void addEdge(Edge edge) {
 	    edges.add(edge);
     }
+
+    /**public void removeEdge(Edge edge) {
+        for (Edge e: edges) {
+            if ((e.getFirst() == this && e.getSecond() == p) || (e.getFirst() == p && e.getSecond() == this)) {
+                edges.remove(e);
+                break;
+            }
+        }
+    }*/
 
 	/*
 	 * Assign the name of the product
