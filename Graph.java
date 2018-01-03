@@ -11,8 +11,6 @@ public class Graph {
     private Map<Integer, ArrayList<Product>> graph;
     private Set<Edge> graphEdges = new HashSet<>();
 
-
-
     public Graph(int n, RandomGenerator rnd, boolean debug) {
         PRODUCTS = n;
         DEBUG = debug;
@@ -82,7 +80,6 @@ public class Graph {
         while (graph.size() > 2) {
             //printGraph();
             if (DEBUG) System.out.println("[DEBUG] Selecting random edge to be removed");
-            System.out.println(graphEdges.size());
             Edge edgeToRemove = getEdge(rnd.getRnd().nextInt(graphEdges.size()));
             Product p1 = edgeToRemove.getFirst();
             Product p2 = edgeToRemove.getOppositeEnd(p1);
@@ -94,11 +91,11 @@ public class Graph {
             p2.remove(edgeToRemove);
             if (DEBUG) System.out.println("[OK] DONE.");
 
-            //this.printProductsConnection();
+            this.printProductsConnection();
 
             merge(p1, p2);
 
-            //this.printProductsConnection();
+            this.printProductsConnection();
         }
         if (DEBUG) System.out.println("[OK] DONE.");
     }
@@ -108,22 +105,24 @@ public class Graph {
         graph.get(getKeyProduct(p1)).add(p2);
         graph.get(getKeyProduct(p1)).addAll(graph.get(getKeyProduct(p2)));
         // Migrate all edges to the combined node
-        for (Iterator<Edge> it = p2.getEdges().iterator(); it.hasNext(); ) {
+        Set<Edge> copy = p2.getEdges();
+        for (Iterator<Edge> it = copy.iterator(); it.hasNext(); ) {
             Edge e = it.next();
             //System.out.println(edgeToString(e));
             it.remove();
+            Product p = e.getOppositeEnd(p2);
             // Remove edge from graph and from product
             graphEdges.remove(e);
             p2.getEdges().remove(e);
-            e.getOppositeEnd(p2).getEdges().remove(e);
-            //this.printProductsConnection();
+            p.remove(e);
+            this.printProductsConnection();
             // Set new value of edge that no longer exists
             e.replaceEndOfEdge(p2, p1);
             // Add modified edge to graph
             p1.addEdge(e);
-            e.getOppositeEnd(p1).addEdge(e);
+            p.addEdge(e);
             graphEdges.add(e);
-            //this.printProductsConnection();
+            this.printProductsConnection();
         }
         //System.out.println();
 
@@ -178,10 +177,11 @@ public class Graph {
 
         for (Map.Entry<Integer, ArrayList<Product>> entry : graph.entrySet()) {
             int i = entry.getKey();
+            stringToPrint.append("Node(");
             if (graph.get(i).isEmpty()){
-                stringToPrint.append("Not merged yet(").append(i).append(')');
+                stringToPrint.append(i).append(')');
             } else {
-                stringToPrint.append("Merged(").append(getKeyGraph(graph.get(i))).append(',');
+                stringToPrint.append(getKeyGraph(graph.get(i))).append(',');
             }
 
             for (int j = 0; j < graph.get(i).size(); j++) {
