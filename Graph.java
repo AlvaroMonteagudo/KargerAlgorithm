@@ -1,14 +1,15 @@
+import java.io.Serializable;
 import java.util.*;
 
-public class Graph {
+public class Graph  {
 
-    private static RandomGenerator rnd;
+    private static Random rnd;
+    private static char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     // Graph parameters
     private int numProducts;
     private boolean debug;
     private boolean weighted;
-    private double totalWeight;
 
     // Data structures
     private boolean buyTogether[][];
@@ -26,7 +27,15 @@ public class Graph {
         buyTogether = new boolean[n][n];
         vertices = new HashMap<>();
 
-        Graph.rnd = new RandomGenerator();
+        rnd = new Random();
+    }
+
+    public void makeCopy(Graph graph) {
+        this.buyTogether = graph.buyTogether;
+        this.vertices = graph.vertices;
+        this.products = graph.products;
+        this.edges = graph.edges;
+        rnd = new Random();
     }
 
     void fill() {
@@ -35,8 +44,8 @@ public class Graph {
         //Initialize random products
         for (int i = 0; i < numProducts; i++) {
 
-            products.put(i, new Product(rnd.stringRandom(), rnd.getRnd().nextInt(10) + 1,
-                    Math.round(rnd.getRnd().nextDouble() * 100.0)));
+            products.put(i, new Product(stringRandom(), rnd.nextInt(10) + 1,
+                    Math.round(rnd.nextDouble() * 100.0)));
 
             vertices.put(i, new ArrayList<>());
         }
@@ -53,14 +62,14 @@ public class Graph {
                         buyTogether[i][j] = true;
                     } else {
                         // If i is bought with j then j is bought with i
-                        buyTogether[i][j] = rnd.getRnd().nextBoolean();
+                        buyTogether[i][j] = rnd.nextBoolean();
                         buyTogether[j][i] = buyTogether[i][j];
 
                         if (buyTogether[i][j]) {
                             // Generate edge of the vertices and save in the corresponding structures
                             Edge edge = new Edge(products.get(i), products.get(j));
                             if (weighted) {
-                                edge.setWeight(rnd.getRnd().nextDouble());
+                                edge.setWeight(rnd.nextDouble());
                             }
                             edges.add(edge);
                             products.get(i).addEdge(edge);
@@ -86,12 +95,26 @@ public class Graph {
         }
     }
 
+    /*
+     * Return a random string
+     */
+    public String stringRandom() {
+        StringBuilder sb = new StringBuilder();
+        char c;
+        for (int i = 0; i < 8; i++) {
+            c = chars[rnd.nextInt(chars.length)];
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
     private Edge uniformRandomEdge() {
+        double totalWeight = 0;
         for (Edge edge : edges) {
             totalWeight += edge.getWeight();
         }
         int index = -1;
-        double random = Math.random() * totalWeight;
+        double random = rnd.nextDouble() * totalWeight;
         for (int i = 0; i < edges.size(); i++) {
             random -= edges.get(i).getWeight();
             if (random <= 0) {
@@ -103,12 +126,13 @@ public class Graph {
         return edges.get(index);
     }
 
-    void minCutKarger() {
+    int minCutKarger() {
         if (debug) System.out.println("[debug] Karger's algorithm in progress...");
         while (vertices.size() > 2) {
             //printGraph();
             if (debug) System.out.println("[debug] Selecting random edge to be removed");
-            Edge edgeToRemove = (weighted) ? uniformRandomEdge() : getEdge(rnd.getRnd().nextInt(edges.size()));
+            Edge edgeToRemove = (weighted) ? uniformRandomEdge() : getEdge(rnd.nextInt(edges.size()));
+            System.out.println(edgeToString(edgeToRemove));
             Product p1 = edgeToRemove.getFirst();
             Product p2 = edgeToRemove.getOppositeEnd(p1);
 
@@ -121,7 +145,7 @@ public class Graph {
             merge(p1, p2);
         }
         if (debug) System.out.println("[OK] DONE.");
-        System.out.println(edges.size());
+        return edges.size();
     }
 
     private void merge(Product p1, Product p2) {
