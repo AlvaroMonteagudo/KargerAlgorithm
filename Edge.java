@@ -6,6 +6,8 @@ public class Edge {
 	private Product first;
     private Product second;
 
+    private double weight;
+
     /**
      * Array list to save both origin and destination vertices of an edge
      */
@@ -17,7 +19,7 @@ public class Edge {
      * @param first Product 1 of the edge
      * @param second Product 2 of the edge
      */
-	public Edge(Product first, Product second) {
+    Edge(Product first, Product second) {
 
 	    if (first == null || second == null) {
 	        throw new NullPointerException("Neither first or second can be null value.");
@@ -28,9 +30,33 @@ public class Edge {
 
 		vertices.add(first);
 		vertices.add(second);
+
+		weight = 0;
 	}
 
-	public Product getOppositeEnd(Product p) {
+    /**
+     * Edge constructor, first and second are just names
+     * doesn't set any kind of direction.
+     * @param first Product 1 of the edge
+     * @param second Product 2 of the edge
+     * @param weight of the edge
+     */
+    Edge(Product first, Product second, double weight) {
+
+        if (first == null || second == null) {
+            throw new NullPointerException("Neither first or second can be null value.");
+        }
+
+        this.first = first;
+        this.second = second;
+
+        vertices.add(first);
+        vertices.add(second);
+
+        this.weight = weight;
+    }
+
+	Product getOppositeEnd(Product p) {
 	    if (first.equals(p)) {
 	        return second;
         } else if (second.equals(p)) {
@@ -40,9 +66,9 @@ public class Edge {
             return null;
         }
 	    //else throw new IllegalArgumentException("Edge does not contain specified product: " + this + " " + p);
-    }
+	}
 
-    public void replaceEndOfEdge(Product oldP, Product newP) {
+    void replaceEndOfEdge(Product oldP, Product newP) {
         if (first.equals(oldP)) {
             first = newP;
         } else if (second.equals(oldP)) {
@@ -52,24 +78,20 @@ public class Edge {
 		}
     }
 
-	public Product getFirst() {
+	Product getFirst() {
 		return first;
 	}
 
-	public void setFirst(Product first) {
-		this.first = first;
-	}
-
-	public Product getSecond() {
+	Product getSecond() {
 		return second;
 	}
 
-	public void setSecond(Product second) {
-		this.second = second;
-	}
+    double getWeight() {
+        return weight;
+    }
 
-    public List<Product> getVertices() {
-        return vertices;
+    void setWeight(double weight) {
+        this.weight = weight;
     }
 
 
@@ -87,7 +109,7 @@ public class Edge {
     @Override
     public int hashCode() {
         int result = first != null ? first.hashCode() : 0;
-        result = 31 * result + (second != null ? second.hashCode() : 0);
+        result = result + (second != null ? second.hashCode() : 0);
         return result;
     }
 }
