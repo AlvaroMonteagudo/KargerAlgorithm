@@ -1,4 +1,5 @@
-import java.io.Serializable;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class Graph  {
@@ -31,11 +32,25 @@ public class Graph  {
     }
 
     public void makeCopy(Graph graph) {
-        this.buyTogether = graph.buyTogether;
-        this.vertices = graph.vertices;
-        this.products = graph.products;
-        this.edges = graph.edges;
+        // vertices se modifican al ejecutar
+        this.buyTogether = graph.buyTogether.clone();
+        this.vertices = new HashMap<Integer,ArrayList<Product>>(graph.vertices);
+        this.products = new HashMap<Integer, Product>(graph.products);
+        this.edges = new ArrayList<Edge>(graph.edges);
         rnd = new Random();
+    }
+
+    private static Object cloneObject(Object obj){
+        try{
+            Object clone = obj.getClass().newInstance();
+            for (Field field : obj.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                field.set(clone, field.get(obj));
+            }
+            return clone;
+        }catch(Exception e){
+            return null;
+        }
     }
 
     void fill() {

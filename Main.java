@@ -14,7 +14,9 @@ public class Main{
             Graph test = new Graph(products, debug, weighted);
             test.makeCopy(graph);
             graph.printGraph();
-            //System.out.println(test.minCutKarger());
+            test.printGraph();
+            test.minCutKarger();
+            graph.printGraph();
             test.printGraph();
         }
 	}
