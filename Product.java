@@ -44,7 +44,15 @@ public class Product {
     Edge getEdge(int i) {
         return (Edge) edges.toArray()[i];
     }
-	
+	public String getName(){
+		return this.name ;
+	}
+	public Double getPrice(){
+		return this.price;
+	}
+	public int getUnit(){
+		return this.unit ;
+	}
 	public String toString(){
 
 	    return "Name: " + this.name + ", Unit: " + this.unit + ", Price: " + this.price;

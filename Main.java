@@ -1,18 +1,28 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
 public class Main{
 
     private static boolean debug = false, weighted = false;
     private static int products = 5, tests = 1;
-
+    private static String sFichero = "initGraph.txt";
 	public static void main(String[] args){
 
 	    parseArguments(args);
 
 	    Graph graph = new Graph(products, debug, weighted);
 	    graph.fill();
+	    File fichero = new File(sFichero);
         for (int i = 0; i < 1; i++) {
-            // Hay que hacer una copia (deep copy) porque test apunta a lo que apunta graph
+        	//Se copia este grafo en un fichero 
+        	graph.writeFile(sFichero,fichero);
             Graph test = new Graph(products, debug, weighted);
-            test.makeCopy(graph);
+            //Se copia el grafo del fichero en test
+            graph.readFile(sFichero,fichero,test);
+//            test.makeCopy(graph);
             graph.printGraph();
             test.printGraph();
             test.minCutKarger();
@@ -20,7 +30,7 @@ public class Main{
             test.printGraph();
         }
 	}
-
+	
     private static void parseArguments(String[] args) {
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {

@@ -30,7 +30,8 @@ public class Graph  {
 
         rnd = new Random();
     }
-
+    
+    
     public void makeCopy(Graph graph) {
         // vertices se modifican al ejecutar
         this.buyTogether = graph.buyTogether.clone();
@@ -213,7 +214,74 @@ public class Graph  {
     private Edge getEdge(int i) {
         return ((Edge) edges.toArray()[i]);
     }
-
+    
+    public void writeFile(String sFichero,File fichero) {
+		try {
+			if (fichero.exists()) {
+				System.out.println("... Escribimos el grafo en el fichero ...");
+				BufferedWriter bw = new BufferedWriter(new FileWriter(sFichero));
+				for (Map.Entry<Integer, ArrayList<Product>> entry : vertices.entrySet()) {
+		            int i = entry.getKey();
+		            bw.write(i + ":");
+		            int fin = 0;
+		            for (int j = 0; j < products.get(i).getEdges().size()-1; j++) {
+		            	 bw.write(getKeyProduct(products.get(i).getEdge(j).getOppositeEnd(products.get(i)))+ ",");
+		            	 fin = j+1;
+		            }
+		            if(fin < products.get(i).getEdges().size()){
+		            	bw.write(getKeyProduct(products.get(i).getEdge(fin).getOppositeEnd(products.get(i)))+ "\n");
+		            }   
+				}
+				bw.close();
+			}	
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+    public void readFile(String sFichero,File fichero,Graph test) {
+		if (fichero.exists()) {
+			Scanner s = null;
+			try {
+				// Leemos el contenido del fichero
+				System.out.println("... Leemos el contenido del fichero ...");
+				s = new Scanner(fichero);
+				for(int i=0;i<numProducts;i++){
+					//Creamos los vertices
+		            test.vertices.put(i, new ArrayList<>());
+					//Creamos los productos
+					Product p = new Product(products.get(i).getName(),products.get(i).getUnit(),products.get(i).getPrice());
+					test.products.put(i, p);	
+				}
+				// Leemos linea a linea el fichero
+				while (s.hasNextLine()) {
+					String linea = s.nextLine(); 	// Guardamos la linea en un String
+					String [] nodos = linea.split(":");
+					int nodo = Integer.parseInt(nodos[0]);
+					test.buyTogether[nodo][nodo] = true;
+					String [] conexiones = nodos[1].split(",");
+					
+					//Creamos las aristas
+					int aristas = 0;
+					for(int i=0;i<conexiones.length;i++){
+						int nodo2 = Integer.parseInt(conexiones[i]);
+						test.buyTogether[nodo][nodo2] = true;
+						Edge edge = new Edge(products.get(nodo),products.get(nodo2));
+						test.products.get(nodo).addEdge(edge);
+						test.products.get(nodo2).addEdge(edge);
+						if(nodo2> nodo){	
+							test.edges.add(aristas, edge);
+							aristas++;	
+						}
+						
+					}	
+				}
+				s.close();
+			}
+			catch (Exception ex) {
+				System.out.println("Mensaje: " + ex.getMessage());
+			}
+		}
+	}
     private String edgeToString(Edge edge) {
         return getKeyProduct(edge.getFirst()) + " - " + getKeyProduct(edge.getSecond());
     }
