@@ -265,7 +265,7 @@ public class Graph  {
 					for(int i=0;i<conexiones.length;i++){
 						int nodo2 = Integer.parseInt(conexiones[i]);
 						test.buyTogether[nodo][nodo2] = true;
-						Edge edge = new Edge(products.get(nodo),products.get(nodo2));
+						Edge edge = new Edge(test.products.get(nodo),test.products.get(nodo2));
 						test.products.get(nodo).addEdge(edge);
 						test.products.get(nodo2).addEdge(edge);
 						if(nodo2> nodo){	
