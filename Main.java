@@ -15,19 +15,18 @@ public class Main{
 
 	    Graph graph = new Graph(products, debug, weighted);
 	    graph.fill();
-        File fichero = new File(sFichero);
-        graph.writeFile(sFichero,fichero);
+	    File fichero = new File(sFichero);
+	    //Se copia este grafo en un fichero 
+    	graph.writeFile(sFichero,fichero);
         for (int i = 0; i < 1; i++) {
-        	//Se copia este grafo en un fichero 
-
             Graph test = new Graph(products, debug, weighted);
             //Se copia el grafo del fichero en test
-            graph.readFile(sFichero,fichero,test);
+            graph.readFile(sFichero,fichero,test);;
             graph.printGraph();
             test.printGraph();
             //test.minCutKarger();
             graph.printGraph();
-            //test.printGraph();
+            test.printGraph();
         }
 	}
 	
