@@ -31,29 +31,6 @@ public class Graph  {
         rnd = new Random();
     }
     
-    
-    public void makeCopy(Graph graph) {
-        // vertices se modifican al ejecutar
-        this.buyTogether = graph.buyTogether.clone();
-        this.vertices = new HashMap<Integer,ArrayList<Product>>(graph.vertices);
-        this.products = new HashMap<Integer, Product>(graph.products);
-        this.edges = new ArrayList<Edge>(graph.edges);
-        rnd = new Random();
-    }
-
-    private static Object cloneObject(Object obj){
-        try{
-            Object clone = obj.getClass().newInstance();
-            for (Field field : obj.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                field.set(clone, field.get(obj));
-            }
-            return clone;
-        }catch(Exception e){
-            return null;
-        }
-    }
-
     void fill() {
 
         if (debug) System.out.print("[debug] Initializing random products... ");
@@ -272,7 +249,6 @@ public class Graph  {
 							test.edges.add(aristas, edge);
 							aristas++;	
 						}
-						
 					}	
 				}
 				s.close();
