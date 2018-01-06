@@ -90,11 +90,6 @@ public class Edge {
         return weight;
     }
 
-    void setWeight(double weight) {
-        this.weight = weight;
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

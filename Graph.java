@@ -1,5 +1,9 @@
+import sun.text.resources.iw.FormatData_iw_IL;
+
 import java.io.*;
 import java.lang.reflect.Field;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 
 public class Graph  {
@@ -55,14 +59,24 @@ public class Graph  {
                         buyTogether[i][j] = true;
                     } else {
                         // If i is bought with j then j is bought with i
-                        buyTogether[i][j] = rnd.nextBoolean();
+                        buyTogether[i][j] = rnd.nextBoolean() | rnd.nextBoolean();
                         buyTogether[j][i] = buyTogether[i][j];
 
                         if (buyTogether[i][j]) {
                             // Generate edge of the vertices and save in the corresponding structures
-                            Edge edge = new Edge(products.get(i), products.get(j));
+                            Edge edge = null;
                             if (weighted) {
-                                edge.setWeight(rnd.nextDouble());
+                                double weight = rnd.nextDouble();
+                                NumberFormat nf = NumberFormat.getInstance();
+                                double number = 0;
+                                try {
+                                    number = nf.parse(String.format("%.3f", weight)).doubleValue();
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                edge = new Edge(products.get(i), products.get(j), number);
+                            } else {
+                                edge = new Edge(products.get(i), products.get(j));
                             }
                             edges.add(edge);
                             products.get(i).addEdge(edge);
@@ -112,6 +126,7 @@ public class Graph  {
             random -= edges.get(i).getWeight();
             if (random <= 0) {
                 // We found pounded edge
+                //System.out.println(i);
                 index = i;
                 break;
             }
@@ -125,7 +140,6 @@ public class Graph  {
             //printGraph();
             if (debug) System.out.println("[debug] Selecting random edge to be removed");
             Edge edgeToRemove = (weighted) ? uniformRandomEdge() : getEdge(rnd.nextInt(edges.size()));
-            System.out.println(edgeToString(edgeToRemove));
             Product p1 = edgeToRemove.getFirst();
             Product p2 = edgeToRemove.getOppositeEnd(p1);
 
@@ -192,77 +206,113 @@ public class Graph  {
         return ((Edge) edges.toArray()[i]);
     }
     
-    public void writeFile(String sFichero,File fichero) {
-		try {
-			if (fichero.exists()) {
-				System.out.println("... Escribimos el grafo en el fichero ...");
-				BufferedWriter bw = new BufferedWriter(new FileWriter(sFichero));
-				for (Map.Entry<Integer, ArrayList<Product>> entry : vertices.entrySet()) {
-		            int i = entry.getKey();
-		            bw.write(i + ":");
-		            int fin = 0;
-		            for (int j = 0; j < products.get(i).getEdges().size()-1; j++) {
-		            	 bw.write(getKeyProduct(products.get(i).getEdge(j).getOppositeEnd(products.get(i)))+ ",");
-		            	 fin = j+1;
-		            }
-		            if(fin < products.get(i).getEdges().size()){
-		            	bw.write(getKeyProduct(products.get(i).getEdge(fin).getOppositeEnd(products.get(i)))+ "\n");
-		            }   
-				}
-				bw.close();
-			}	
+    public void saveGraph(String sFichero) {
+        try {
+            File file = new File(sFichero);
+			if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            if (debug) System.out.println("[debug] Saving graph to file " + sFichero);
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(sFichero));
+            StringBuilder line = new StringBuilder();
+
+            for (Map.Entry<Integer, ArrayList<Product>> entry : vertices.entrySet()) {
+                int i = entry.getKey();
+                bw.write(i + ":");
+
+                for (int j = 0; j < products.get(i).getEdges().size(); j++) {
+                    line.append(getKeyProduct(products.get(i).getEdge(j).getOppositeEnd(products.get(i))));
+                    if (weighted) {
+                        line.append("-").append(products.get(i).getEdge(j).getWeight());
+                    }
+                    line.append(",");
+                }
+
+                line.deleteCharAt(line.toString().lastIndexOf(','));
+                bw.write(line.toString());
+                bw.newLine();
+                line.setLength(0);
+            }
+            bw.close();
+
+            if (debug) System.out.println("[OK] DONE");
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-    public void readFile(String sFichero,File fichero,Graph test) {
-		if (fichero.exists()) {
-			Scanner s = null;
-			try {
-				// Leemos el contenido del fichero
-				System.out.println("... Leemos el contenido del fichero ...");
-				s = new Scanner(fichero);
-				for(int i=0;i<numProducts;i++){
-					//Creamos los vertices
-		            test.vertices.put(i, new ArrayList<>());
-					//Creamos los productos
-					Product p = new Product(products.get(i).getName(),products.get(i).getUnit(),products.get(i).getPrice());
-					test.products.put(i, p);	
-				}
-				// Leemos linea a linea el fichero
-				while (s.hasNextLine()) {
-					String linea = s.nextLine(); 	// Guardamos la linea en un String
-					String [] nodos = linea.split(":");
-					int nodo = Integer.parseInt(nodos[0]);
-					test.buyTogether[nodo][nodo] = true;
-					String [] conexiones = nodos[1].split(",");
-					
-					//Creamos las aristas
-					int aristas = 0;
-					for(int i=0;i<conexiones.length;i++){
-						int nodo2 = Integer.parseInt(conexiones[i]);
-						test.buyTogether[nodo][nodo2] = true;
-						Edge edge = new Edge(test.products.get(nodo),test.products.get(nodo2));
-						test.products.get(nodo).addEdge(edge);
-						test.products.get(nodo2).addEdge(edge);
-						if(nodo2> nodo){	
-							test.edges.add(aristas, edge);
-							aristas++;	
-						}
-					}	
-				}
-				s.close();
-			}
-			catch (Exception ex) {
-				System.out.println("Mensaje: " + ex.getMessage());
-			}
-		}
-	}
+
+    public void makeCopy(String sFichero, Graph test) {
+        File file = new File(sFichero);
+        if (file.exists()) {
+            Scanner s = null;
+            try {
+
+                if (debug) System.out.println("[debug] Making copy of graph...");
+                s = new Scanner(file);
+                for(int i = 0; i < numProducts; i++){
+                    test.vertices.put(i, new ArrayList<>());
+                    Product p = new Product(products.get(i).getName(),products.get(i).getUnit(),products.get(i).getPrice());
+                    test.products.put(i, p);
+                }
+
+                while (s.hasNextLine()) {
+                    String line = s.nextLine();
+                    String [] nodes = line.split(":");
+                    int i = Integer.parseInt(nodes[0]);
+                    test.buyTogether[i][i] = true;
+                    String [] connections = nodes[1].split(",");
+
+                    int n = 0;
+                    for(String connection: connections){
+                        int j = (connection.contains("-")) ?
+                                    Integer.parseInt(connection.split("-")[0].replaceAll("\\s+","")) :
+                                    Integer.parseInt(connection);
+                        test.buyTogether[i][j] = true;
+                        Edge edge = null;
+                        if (weighted){
+                            String [] splitted = connection.split("-");
+                            NumberFormat nf = NumberFormat.getInstance();
+                            double weight = 0;
+                            try {
+                                weight = nf.parse(splitted[1]).doubleValue();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            edge = new Edge(test.products.get(i), test.products.get(j), weight);
+                        } else{
+                            edge = new Edge(test.products.get(i), test.products.get(j));
+
+                        }
+                        test.products.get(i).addEdge(edge);
+                        test.products.get(j).addEdge(edge);
+                        if(j > i){
+                            test.edges.add(n, edge);
+                            n++;
+                        }
+                    }
+
+
+                }
+                s.close();
+                if (debug) System.out.println("[OK] DONE.");
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
     private String edgeToString(Edge edge) {
         return getKeyProduct(edge.getFirst()) + " - " + getKeyProduct(edge.getSecond());
     }
 
-    /// Todavía no es definitivo pero para aclarar va bien
     void printGraph(){
         System.out.println("GRAPH");
         System.out.println("=====\n");
