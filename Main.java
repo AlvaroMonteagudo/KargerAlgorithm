@@ -3,8 +3,8 @@ import java.io.IOException;
 
 public class Main{
 
-    private static boolean debug = false, weighted = true;
-    private static int products = 5, tests = 10;
+    private static boolean debug = false, weighted = false;
+    private static int products = 300, tests = 1;
     private static String file = "graph";
 
 	public static void main(String[] args){
@@ -12,33 +12,23 @@ public class Main{
 	    parseArguments(args);
 
         System.out.println("Running " + tests + " tests in a " + products + " vertices 70% connected graph.");
-
 	    Graph graph = new Graph(products, debug, weighted);
         graph.fill();
     	graph.saveGraph(file);
-
-    	//StringBuilder stats = new StringBuilder();
-        StringBuilder statsWeighted = new StringBuilder();
-
-        //stats.append("No weighted ");
-        statsWeighted.append("Weighted \t");
+		  
         System.out.print("Iteration");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < tests; i++) {
             System.out.print("\t" + (i + 1));
-            //Graph test = new Graph(products, debug, false);
-            Graph weighted = new Graph(products, debug, true);
-            graph.makeCopy(file, weighted);
-
-            //graph.makeCopy(file, weighted);
-            //weighted.minCutKarger();
-            //weighted.printGraph();
-
-            //stats.append(test.minCutKarger()).append("\t");
-            statsWeighted.append(weighted.minCutKarger()).append("\t");
+            Graph test = new Graph(products, debug, weighted);
+            graph.makeCopy(file, test);
+            double start = System.currentTimeMillis();
+        	test.minCutKarger();
+        	double end = System.currentTimeMillis();
+        	double timeSeconds =(end-start)/1000;
+        	System.out.println("El tiempo es: "+timeSeconds);
+            test.printGraph();
         }
-        System.out.println();
-        //System.out.println(stats.toString());
-        System.out.println(statsWeighted.toString());
+        System.out.println();   
     }
 	
     private static void parseArguments(String[] args) {
