@@ -4,7 +4,7 @@ import java.io.IOException;
 public class Main{
 
     private static boolean debug = false, weighted = false;
-    private static int products = 300, tests = 1;
+    private static int products = 5, tests = 10;
     private static String file = "graph";
 
 	public static void main(String[] args){
@@ -15,10 +15,9 @@ public class Main{
 	    Graph graph = new Graph(products, debug, weighted);
         graph.fill();
     	graph.saveGraph(file);
-		  
-        System.out.print("Iteration");
+
         for (int i = 0; i < tests; i++) {
-            System.out.print("\t" + (i + 1));
+            System.out.print((i + 1) + ": ");
             Graph test = new Graph(products, debug, weighted);
             graph.makeCopy(file, test);
             double start = System.currentTimeMillis();
@@ -27,8 +26,9 @@ public class Main{
         	double timeSeconds =(end-start)/1000;
         	System.out.println("El tiempo es: "+timeSeconds);
             test.printGraph();
+            //System.out.println(test.minCutKarger());
         }
-        System.out.println();   
+        //System.out.println();
     }
 	
     private static void parseArguments(String[] args) {
